@@ -3,63 +3,712 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Base Converter • Recursive</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <title>Base Converter • Jash 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --surface: #141418;
+      --surface2: #1c1c22;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.14);
+      --text: #f0f0f0;
+      --muted: #666;
+      --muted2: #999;
+      --accent: #e8ff6e;
+      --accent2: #6effc8;
+      --accent3: #ff6e6e;
+      --mono: 'Space Mono', monospace;
+      --sans: 'DM Sans', system-ui, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 56px;
+    }
+
+    .header-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted2);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    h1 {
+      font-family: var(--mono);
+      font-size: clamp(2rem, 6vw, 3.8rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    .subtitle {
+      margin-top: 14px;
+      font-size: 15px;
+      color: var(--muted2);
+      font-weight: 300;
+    }
+
+    /* Main layout */
+    .main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .main { grid-template-columns: 1fr; }
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    }
+
+    .card-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 9px 4px;
+      background: none;
+      border: none;
+      border-radius: 7px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab:hover { color: var(--text); }
+
+    .tab.active {
+      background: var(--surface);
+      color: var(--accent);
+      border: 1px solid var(--border2);
+    }
+
+    /* Input field */
+    .field-wrap {
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      color: var(--muted2);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    input[type="text"].error {
+      border-color: var(--accent3);
+    }
+
+    .err-msg {
+      font-size: 12px;
+      color: var(--accent3);
+      margin-top: 6px;
+      min-height: 18px;
+      font-family: var(--mono);
+    }
+
+    /* Convert button */
+    .btn-convert {
+      width: 100%;
+      margin-top: 16px;
+      padding: 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: #0d0d0f;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-convert:hover {
+      background: #f0ff80;
+      transform: translateY(-1px);
+    }
+
+    .btn-convert:active {
+      transform: translateY(0);
+    }
+
+    /* Output card */
+    .output-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .output-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(232,255,110,0.3), transparent);
+    }
+
+    .outputs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 500px) {
+      .outputs-grid { grid-template-columns: 1fr; }
+    }
+
+    .out-block {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .out-block:hover {
+      border-color: var(--border2);
+    }
+
+    .out-block.highlighted {
+      border-color: var(--accent);
+    }
+
+    .out-type {
+      font-size: 10px;
+      font-family: var(--mono);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .out-value {
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+      word-break: break-all;
+      line-height: 1.3;
+    }
+
+    .out-block.secondary .out-value {
+      color: var(--accent2);
+    }
+
+    .out-block.tertiary .out-value {
+      color: #c8a0ff;
+    }
+
+    .copy-hint {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 8px;
+      font-family: var(--mono);
+    }
+
+    .copied-flash {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: var(--accent);
+      color: #0d0d0f;
+      font-size: 10px;
+      font-family: var(--mono);
+      padding: 3px 8px;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+
+    .copied-flash.show { opacity: 1; }
+
+    /* Steps strip */
+    .steps-strip {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted2);
+    }
+
+    .step-arrow {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .empty-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+
+    /* History */
+    .history-section {
+      margin-top: 16px;
+    }
+
+    .history-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .history-row:hover { background: var(--surface2); }
+
+    .hist-from { color: var(--muted2); flex: 1; }
+    .hist-arrow { color: var(--muted); }
+    .hist-to { color: var(--accent); font-weight: 700; }
+    .hist-type { color: var(--muted); font-size: 10px; margin-left: auto; }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: var(--mono);
+      letter-spacing: 0.05em;
+    }
+
+    .badge-dec { background: rgba(232,255,110,0.12); color: var(--accent); }
+    .badge-bin { background: rgba(110,255,200,0.12); color: var(--accent2); }
+    .badge-hex { background: rgba(200,160,255,0.12); color: #c8a0ff; }
+
+    /* Footer */
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* Animated result entry */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-in {
+      animation: slideUp 0.3s ease both;
+    }
+
+    .clear-hist {
+      font-size: 11px;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: var(--mono);
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .clear-hist:hover { color: var(--accent3); }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1><i class="fa-solid fa-shuffle"></i> Number Base Converter</h1>
-      <p>Powered by your original recursive Java logic</p>
-    </header>
+<div class="wrap">
+  <header>
+    <div class="header-tag">
+      <div class="dot"></div>
+      Recursive Java Logic — Ported to JS
+    </div>
+    <h1>Base<span>_</span>Converter</h1>
+    <p class="subtitle">Binary · Decimal · Hexadecimal — Jash · 2026</p>
+  </header>
 
-    <div class="main-grid">
-      <!-- Input Section -->
-      <div class="card input-card">
-        <h2>Step 1: Input</h2>
-        <div class="input-group">
-          <label for="typeSelect">Type of Number</label>
-          <select id="typeSelect" onchange="handleTypeChange()">
-            <option value="0">0 - Decimal</option>
-            <option value="1">1 - Binary</option>
-            <option value="2">2 - Hexadecimal</option>
-          </select>
-        </div>
-
-        <div class="input-group">
-          <label for="numberInput">Enter the Number</label>
-          <input type="text" id="numberInput" placeholder="e.g. 255 or 1010 or FF">
-        </div>
-
-        <button onclick="setInput()" class="btn-primary">
-          <i class="fa-solid fa-check"></i> Set Input
-        </button>
+  <div class="main">
+    <!-- Input card -->
+    <div class="card">
+      <div class="card-label">01 / Input</div>
+      <div class="tabs" id="tabs">
+        <button class="tab active" data-type="0" onclick="switchTab(0)">DEC</button>
+        <button class="tab" data-type="1" onclick="switchTab(1)">BIN</button>
+        <button class="tab" data-type="2" onclick="switchTab(2)">HEX</button>
       </div>
 
-      <!-- Conversion Section -->
-      <div class="card conversion-card">
-        <h2>Step 2: Choose Conversion</h2>
-        <div id="conversionOptions" class="options-grid">
-          <!-- Dynamically filled by JS -->
-        </div>
+      <label class="field-label" id="fieldLabel">Enter decimal number</label>
+      <div class="field-wrap">
+        <input type="text" id="numInput" placeholder="e.g. 255" autocomplete="off" oninput="clearErrors()" onkeydown="handleKey(event)" />
+      </div>
+      <div class="err-msg" id="errMsg"></div>
+
+      <button class="btn-convert" onclick="convertAll()">CONVERT →</button>
+    </div>
+
+    <!-- Output card -->
+    <div class="card output-card" id="outputCard">
+      <div class="card-label">02 / Output</div>
+
+      <div id="emptyState" class="empty-state">
+        <div class="empty-icon">◈</div>
+        Enter a value and convert
+      </div>
+
+      <div id="results" style="display:none;">
+        <div class="steps-strip" id="stepsStrip"></div>
+        <div class="outputs-grid" id="outputsGrid"></div>
       </div>
     </div>
-
-    <!-- Result -->
-    <div id="resultCard" class="card result-card hidden">
-      <h2>Result</h2>
-      <div id="resultValue" class="result-value"></div>
-      <button onclick="resetAll()" class="btn-secondary">
-        <i class="fa-solid fa-rotate-right"></i> New Conversion
-      </button>
-    </div>
-
-    <footer>
-      Built from your Eclipse Java code • Jash • 2026
-    </footer>
   </div>
 
-  <script src="script.js"></script>
+  <!-- History -->
+  <div class="card history-section" id="historyCard" style="display:none;">
+    <div class="section-head">
+      <div class="card-label" style="margin:0;">03 / History</div>
+      <button class="clear-hist" onclick="clearHistory()">clear</button>
+    </div>
+    <div id="historyList"></div>
+  </div>
+
+  <footer>Built for CS Final Project &nbsp;·&nbsp; Recursive Java Logic Preserved</footer>
+</div>
+
+<script>
+// ============ YOUR ORIGINAL RECURSIVE FUNCTIONS ============
+
+function toHexChar(temps) {
+  if (temps < 10) return String(temps);
+  return String.fromCharCode(65 + (temps - 10));
+}
+
+function toDecChar(inp) {
+  const ch = inp.toUpperCase();
+  if (ch >= '0' && ch <= '9') return ch.charCodeAt(0) - 48;
+  return ch.charCodeAt(0) - 65 + 10;
+}
+
+function recDecToBin(no) {
+  if (no === 0) return 0;
+  return (no % 2) + recDecToBin(Math.floor(no / 2)) * 10;
+}
+
+function recDecToHex(no) {
+  if (no < 16) return toHexChar(no);
+  return recDecToHex(Math.floor(no / 16)) + toHexChar(no % 16);
+}
+
+function recBinToDec(no, pointer = 0) {
+  if (no === 0) return 0;
+  const newPointer = pointer + 1;
+  return ((no % 10) * Math.pow(2, newPointer)) + recBinToDec(Math.floor(no / 10), newPointer);
+}
+
+function recHexToDec(temps) {
+  if (temps.length === 0) return 0;
+  return recHexToDec(temps.substring(0, temps.length - 1)) * 16 + toDecChar(temps.charAt(temps.length - 1));
+}
+
+// ============ APP STATE ============
+
+let currentType = 0;
+let history = [];
+
+const typeNames = ['Decimal', 'Binary', 'Hexadecimal'];
+const typeBadge = ['badge-dec', 'badge-bin', 'badge-hex'];
+const typeCodes = ['DEC', 'BIN', 'HEX'];
+const placeholders = ['e.g. 255', 'e.g. 1010', 'e.g. FF'];
+const fieldLabels = ['Enter decimal number', 'Enter binary number', 'Enter hexadecimal number'];
+
+// ============ UI ============
+
+function switchTab(type) {
+  currentType = type;
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', i === type);
+  });
+  document.getElementById('numInput').placeholder = placeholders[type];
+  document.getElementById('fieldLabel').textContent = fieldLabels[type];
+  document.getElementById('numInput').value = '';
+  clearErrors();
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'block';
+  document.getElementById('numInput').focus();
+}
+
+function clearErrors() {
+  document.getElementById('errMsg').textContent = '';
+  document.getElementById('numInput').classList.remove('error');
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter') convertAll();
+}
+
+function showError(msg) {
+  document.getElementById('errMsg').textContent = msg;
+  document.getElementById('numInput').classList.add('error');
+}
+
+function convertAll() {
+  const raw = document.getElementById('numInput').value.trim();
+  if (!raw) { showError('Please enter a value.'); return; }
+
+  let decVal;
+
+  if (currentType === 0) {
+    const n = parseInt(raw, 10);
+    if (isNaN(n) || !/^\d+$/.test(raw)) { showError('Invalid decimal. Use digits 0–9.'); return; }
+    if (n < 0) { showError('Negative numbers not supported.'); return; }
+    decVal = n;
+  } else if (currentType === 1) {
+    if (!/^[01]+$/.test(raw)) { showError('Invalid binary. Use only 0 and 1.'); return; }
+    const parsed = parseInt(raw, 10);
+    decVal = Math.floor(recBinToDec(parsed, 0) / 2);
+  } else {
+    const up = raw.toUpperCase();
+    if (!/^[0-9A-F]+$/.test(up)) { showError('Invalid hex. Use 0–9 and A–F.'); return; }
+    decVal = recHexToDec(up);
+  }
+
+  const binVal = String(recDecToBin(decVal));
+  const hexVal = decVal === 0 ? '0' : recDecToHex(decVal);
+  const decStr = String(decVal);
+
+  const outputs = [
+    { type: 'DEC', label: 'Decimal', value: decStr, cls: '' },
+    { type: 'BIN', label: 'Binary', value: binVal, cls: 'secondary' },
+    { type: 'HEX', label: 'Hexadecimal', value: hexVal, cls: 'tertiary' },
+  ];
+
+  const inputObj = { type: currentType, raw, decVal, binVal, hexVal };
+  renderResults(outputs, inputObj);
+  addHistory(inputObj);
+}
+
+function renderResults(outputs, input) {
+  document.getElementById('emptyState').style.display = 'none';
+  const res = document.getElementById('results');
+  res.style.display = 'block';
+
+  const strip = document.getElementById('stepsStrip');
+  strip.innerHTML = outputs.map((o, i) => `
+    <div class="step-item animate-in" style="animation-delay:${i * 0.05}s">
+      <span class="badge ${typeBadge[['DEC','BIN','HEX'].indexOf(o.type)]}">${o.type}</span>
+      <span>${o.value.length > 10 ? o.value.slice(0,8)+'…' : o.value}</span>
+    </div>
+    ${i < outputs.length - 1 ? '<span class="step-arrow">→</span>' : ''}
+  `).join('');
+
+  const grid = document.getElementById('outputsGrid');
+  grid.innerHTML = outputs.map((o, i) => `
+    <div class="out-block ${o.cls} animate-in" style="animation-delay:${i * 0.07}s" onclick="copyVal('${o.value}', this)">
+      <div class="out-type">${o.label}</div>
+      <div class="out-value">${o.value}</div>
+      <div class="copy-hint">click to copy</div>
+      <div class="copied-flash">COPIED</div>
+    </div>
+  `).join('');
+}
+
+function copyVal(val, el) {
+  navigator.clipboard.writeText(val).catch(() => {});
+  const flash = el.querySelector('.copied-flash');
+  flash.classList.add('show');
+  setTimeout(() => flash.classList.remove('show'), 1200);
+}
+
+// ============ HISTORY ============
+
+function addHistory(item) {
+  history.unshift(item);
+  if (history.length > 6) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  if (!history.length) {
+    document.getElementById('historyCard').style.display = 'none';
+    return;
+  }
+  document.getElementById('historyCard').style.display = 'block';
+  const list = document.getElementById('historyList');
+  list.innerHTML = history.map((h, i) => {
+    const from = h.raw.toUpperCase();
+    return `
+      <div class="history-row" onclick="loadHistory(${i})" title="Click to reload">
+        <span class="badge ${typeBadge[h.type]}">${typeCodes[h.type]}</span>
+        <span class="hist-from">${from}</span>
+        <span class="hist-arrow">→</span>
+        <span class="hist-to">${h.decVal}</span>
+        <span class="hist-type">${h.binVal} / ${h.hexVal}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function loadHistory(idx) {
+  const h = history[idx];
+  switchTab(h.type);
+  document.getElementById('numInput').value = h.raw;
+  convertAll();
+}
+
+function clearHistory() {
+  history = [];
+  renderHistory();
+}
+
+// Init
+window.onload = () => {
+  document.getElementById('numInput').focus();
+};
+</script>
 </body>
 </html>
