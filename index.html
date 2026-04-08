@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base Converter • Recursive</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fa-solid fa-shuffle"></i> Number Base Converter</h1>
+      <p>Powered by your original recursive Java logic</p>
+    </header>
+
+    <div class="main-grid">
+      <!-- Input Section -->
+      <div class="card input-card">
+        <h2>Step 1: Input</h2>
+        <div class="input-group">
+          <label for="typeSelect">Type of Number</label>
+          <select id="typeSelect" onchange="handleTypeChange()">
+            <option value="0">0 - Decimal</option>
+            <option value="1">1 - Binary</option>
+            <option value="2">2 - Hexadecimal</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label for="numberInput">Enter the Number</label>
+          <input type="text" id="numberInput" placeholder="e.g. 255 or 1010 or FF">
+        </div>
+
+        <button onclick="setInput()" class="btn-primary">
+          <i class="fa-solid fa-check"></i> Set Input
+        </button>
+      </div>
+
+      <!-- Conversion Section -->
+      <div class="card conversion-card">
+        <h2>Step 2: Choose Conversion</h2>
+        <div id="conversionOptions" class="options-grid">
+          <!-- Dynamically filled by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="resultCard" class="card result-card hidden">
+      <h2>Result</h2>
+      <div id="resultValue" class="result-value"></div>
+      <button onclick="resetAll()" class="btn-secondary">
+        <i class="fa-solid fa-rotate-right"></i> New Conversion
+      </button>
+    </div>
+
+    <footer>
+      Built from your Eclipse Java code • Jash • 2026
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
